@@ -43,6 +43,58 @@ void BehaviorAgent::update(float dt)
     tree.update(dt);
 }
 
+inline Vec3 Mix(Vec3 x, Vec3 y, float a) {
+    return x + ((y - x) * a);
+}
+
+void BehaviorAgent::path_interp(const Vec3& begin, const Vec3& dest, float a) {
+    set_position(Mix(begin, dest, a));
+}
+
+bool BehaviorAgent::move_toward_agent(Agent* target, float dt)
+{
+    Vec3 point = target->get_position();
+
+    bool result = false;
+
+    const auto currentPos = get_position();
+
+    auto delta = point - currentPos;
+
+    const float length = delta.Length();
+
+    // see if we're close enough to the goal
+    if (length <= movementEpsilon)
+    {
+        // no need to actually move
+        result = true;
+    }
+    else
+    {
+        // determine how far to actually move
+        float actualSpeed = get_movement_speed() * dt;
+        
+        // see if we even need to move the full distance
+        if (length < actualSpeed)
+        {
+            // this move will put us within range of the target point
+            result = true;
+            actualSpeed = length;
+        }
+
+        delta.Normalize();
+        delta *= actualSpeed;
+
+        const auto nextPos = currentPos + delta;
+        set_position(nextPos);
+
+        const float yaw = std::atan2(delta.x, delta.z);
+        set_yaw(yaw);
+    }
+
+    return result;
+}
+
 bool BehaviorAgent::move_toward_point(const Vec3 &point, float dt)
 {
     bool result = false;

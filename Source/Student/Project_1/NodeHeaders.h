@@ -27,3 +27,6 @@
 #include "Leaf/L_MoveToRandomPosition.h"
 
 // Student Leaf Nodes
+#include "Leaf/L_ExponentialToRandomPosition.h"
+#include "Leaf/L_EaseInOut.h"
+#include "Leaf/L_MoveToClosestVictim.h"
