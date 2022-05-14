@@ -27,6 +27,11 @@
 #include "Leaf/L_MoveToRandomPosition.h"
 
 // Student Leaf Nodes
+#include "ControlFlow/C_EternalSequencer.h"
+
 #include "Leaf/L_ExponentialToRandomPosition.h"
 #include "Leaf/L_EaseInOut.h"
 #include "Leaf/L_MoveToClosestVictim.h"
+#include "Leaf/L_Float.h"
+#include "Leaf/L_Rotate.h"
+#include "Leaf/L_MigrateTowers.h"

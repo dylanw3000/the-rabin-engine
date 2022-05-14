@@ -33,7 +33,7 @@ public:
     void release_rendering_resources();
 
     // agentType is for debug display and also looking up all agents of a specific type
-    BehaviorAgent *create_behavior_agent(const char *agentType, BehaviorTreeTypes treeType);
+    BehaviorAgent *create_behavior_agent(const char *agentType, BehaviorTreeTypes treeType, UnitType unitType);
     AStarAgent *create_pathing_agent();
     EnemyAgent *create_enemy_agent();
     void destroy_agent(Agent *agent);

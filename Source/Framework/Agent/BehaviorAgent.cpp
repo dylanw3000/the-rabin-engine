@@ -21,11 +21,12 @@ namespace
     const std::wstring debugNameSeparator(L"_");
 }
 
-BehaviorAgent::BehaviorAgent(const char *type, size_t id) : Agent(type, id)
+BehaviorAgent::BehaviorAgent(const char *_type, size_t id, UnitType unitType) : Agent(_type, id)
 {
-    const std::string temp(type);
+    const std::string temp(_type);
     debugName = std::wstring(temp.begin(), temp.end()) + debugNameSeparator + std::to_wstring(id);
     set_movement_speed(10.0f);
+    type = unitType;
 }
 
 Blackboard &BehaviorAgent::get_blackboard()

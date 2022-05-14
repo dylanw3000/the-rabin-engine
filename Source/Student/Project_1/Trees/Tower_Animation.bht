@@ -1,0 +1,4 @@
+TREENAME(Tower_Animation)
+TREENODE(C_EternalSequencer, 0)
+TREENODE(L_Float, 1)
+TREENODE(L_Rotate, 1)

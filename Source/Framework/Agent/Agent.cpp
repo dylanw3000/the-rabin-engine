@@ -22,7 +22,7 @@ const Vec3 globalForward = Vec3(0.0f, 0.0f, 1.0f);
 std::unique_ptr<DirectX::Model> Agent::model;
 
 Agent::Agent(const char *type, size_t id) : position(0.0f, 0.0f, 0.0f),
-    scaling(2.f), eulerAngles(0.f), isDirty(true), color(0.7f), type(type), id(id), movementSpeed(2000.0f / 2.3f)
+    scaling(1.f), eulerAngles(0.f), isDirty(true), color(0.7f), type(type), id(id), movementSpeed(2000.0f / 2.3f)
 {}
 
 #pragma region Getters

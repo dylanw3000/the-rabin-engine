@@ -6,7 +6,7 @@ void L_EaseInOut::on_enter()
 {
     // set animation, speed, etc
 
-    startingPoint = agent->get_position();
+    startPoint = agent->get_position();
     targetPoint = RNG::world_position();
 
     time = 0.f;
@@ -20,11 +20,11 @@ void L_EaseInOut::on_update(float dt)
     time += dt;
 
     if (time >= maxTime) {
-        agent->path_interp(startingPoint, targetPoint, 1.f);
+        agent->path_interp(startPoint, targetPoint, 1.f);
         on_success();
     }
 
     float a = (-cosf(time / maxTime * M_PI) + 1.f) / 2;
-    agent->path_interp(startingPoint, targetPoint, a);
+    agent->path_interp(startPoint, targetPoint, a);
     display_leaf_text();
 }

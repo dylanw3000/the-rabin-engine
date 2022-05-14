@@ -18,8 +18,9 @@ void L_MoveToClosestVictim::on_enter()
 
     for (Agent* a : allAgents)
     {
+        BehaviorAgent* aa = static_cast<BehaviorAgent*>(a);
         // make sure it's not our agent
-        if (a != agent)
+        if (aa->getUnitType() == UnitType::Common && a != agent)
         {
             const auto &agentPos = a->get_position();
             const float distance = Vec3::Distance(currPos, agentPos);

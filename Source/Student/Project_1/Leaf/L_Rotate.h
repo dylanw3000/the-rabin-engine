@@ -1,14 +1,12 @@
 #pragma once
 #include "BehaviorNode.h"
-#include "Misc/NiceTypes.h"
 
-class L_EaseInOut : public BaseNode<L_EaseInOut>
+class L_Rotate : public BaseNode<L_Rotate>
 {
 protected:
     virtual void on_enter() override;
     virtual void on_update(float dt) override;
 
 private:
-    Vec3 startPoint, targetPoint;
-    float time, maxTime;
+    float timer;
 };

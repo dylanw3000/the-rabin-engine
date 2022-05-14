@@ -5,13 +5,25 @@
 void ProjectOne::setup()
 {
     // Create your inital agents
-    agents->create_behavior_agent("ExampleAgent", BehaviorTreeTypes::Example);
-    agents->create_behavior_agent("Initial_Boi", BehaviorTreeTypes::Initial);
-    agents->create_behavior_agent("Easy", BehaviorTreeTypes::Ease);
+    agents->create_behavior_agent("ExampleAgent", BehaviorTreeTypes::Example, UnitType::Common);
+    agents->create_behavior_agent("Initial_Boi", BehaviorTreeTypes::Initial, UnitType::Common);
+    agents->create_behavior_agent("Easy", BehaviorTreeTypes::Ease, UnitType::Common);
 
-    BehaviorAgent* predator = agents->create_behavior_agent("Predator", BehaviorTreeTypes::Predator);
+    BehaviorAgent* predator = agents->create_behavior_agent("Predator", BehaviorTreeTypes::Predator, UnitType::Predator);
     predator->set_position(Vec3(100, 0, 0));
     predator->set_movement_speed(16.f);
+    predator->set_scaling(2.f);
+
+    BehaviorAgent* tower1 = agents->create_behavior_agent("Tower 1", BehaviorTreeTypes::Tower_Animation, UnitType::Tower);
+    tower1->set_position(Vec3(10, 0, 90));
+    tower1->set_pitch(-0.2f);
+    tower1->set_scaling(3.f);
+
+    BehaviorAgent* tower2 = agents->create_behavior_agent("Tower 1", BehaviorTreeTypes::Tower_Animation, UnitType::Tower);
+    tower2->set_position(Vec3(90, 0, 10));
+    tower2->set_yaw(M_PI/2);
+    tower2->set_pitch(-0.2f);
+    tower2->set_scaling(3.f);
 
     // you can technically load any map you want, even create your own map file,
     // but behavior agents won't actually avoid walls or anything special, unless you code that yourself

@@ -47,7 +47,7 @@ void AgentOrganizer::release_rendering_resources()
     Agent::release_rendering_resources();
 }
 
-BehaviorAgent *AgentOrganizer::create_behavior_agent(const char *type, BehaviorTreeTypes treeType)
+BehaviorAgent *AgentOrganizer::create_behavior_agent(const char *type, BehaviorTreeTypes treeType, UnitType unitType)
 {
     // make sure the tree builder is initialized
     if (treeBuilder)
@@ -57,7 +57,7 @@ BehaviorAgent *AgentOrganizer::create_behavior_agent(const char *type, BehaviorT
 
         std::cout << "Creating agent " << type << id << std::endl;
 
-        auto agent = new BehaviorAgent(type, id);
+        auto agent = new BehaviorAgent(type, id, unitType);
 
         // build a tree from the prototype
         treeBuilder->build_tree(treeType, agent);

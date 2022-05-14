@@ -2,7 +2,7 @@
 #include "BehaviorNode.h"
 #include "Misc/NiceTypes.h"
 
-class L_EaseInOut : public BaseNode<L_EaseInOut>
+class L_MigrateTowers : public BaseNode<L_MigrateTowers>
 {
 protected:
     virtual void on_enter() override;
