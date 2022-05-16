@@ -337,6 +337,12 @@
     <ClInclude Include="Source\Student\Project_1\ControlFlow\C_EternalSequencer.h">
       <Filter>Source\Student\Project_1\ControlFlow</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Student\Project_1\Leaf\L_Ramming.h">
+      <Filter>Source\Student\Project_1\Leaf</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Student\Project_1\Leaf\L_Jiggle.h">
+      <Filter>Source\Student\Project_1\Leaf</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Framework\Main.cpp">
@@ -575,6 +581,12 @@
     </ClCompile>
     <ClCompile Include="Source\Student\Project_1\ControlFlow\C_EternalSequencer.cpp">
       <Filter>Source\Student\Project_1\ControlFlow</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Student\Project_1\Leaf\L_Ramming.cpp">
+      <Filter>Source\Student\Project_1\Leaf</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Student\Project_1\Leaf\L_Jiggle.cpp">
+      <Filter>Source\Student\Project_1\Leaf</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

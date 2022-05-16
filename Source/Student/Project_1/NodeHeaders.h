@@ -35,3 +35,5 @@
 #include "Leaf/L_Float.h"
 #include "Leaf/L_Rotate.h"
 #include "Leaf/L_MigrateTowers.h"
+#include "Leaf/L_Ramming.h"
+#include "Leaf/L_Jiggle.h"

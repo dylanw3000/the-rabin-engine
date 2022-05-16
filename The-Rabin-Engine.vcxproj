@@ -260,11 +260,13 @@
     <ClInclude Include="Source\Student\Project_1\Leaf\L_ExponentialToRandomPosition.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_Float.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_Idle.h" />
+    <ClInclude Include="Source\Student\Project_1\Leaf\L_Jiggle.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_MoveToClosestVictim.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_MoveToFurthestAgent.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_MoveToMouseClick.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_MoveToRandomPosition.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_MigrateTowers.h" />
+    <ClInclude Include="Source\Student\Project_1\Leaf\L_Ramming.h" />
     <ClInclude Include="Source\Student\Project_1\Leaf\L_Rotate.h" />
     <ClInclude Include="Source\Student\Project_1\NodeHeaders.h" />
     <ClInclude Include="Source\Student\Project_2\P2_Pathfinding.h" />
@@ -345,11 +347,13 @@
     <ClCompile Include="Source\Student\Project_1\Leaf\L_ExponentialToRandomPosition.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_Float.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_Idle.cpp" />
+    <ClCompile Include="Source\Student\Project_1\Leaf\L_Jiggle.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_MoveToClosestVictim.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_MoveToFurthestAgent.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_MoveToMouseClick.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_MoveToRandomPosition.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_MigrateTowers.cpp" />
+    <ClCompile Include="Source\Student\Project_1\Leaf\L_Ramming.cpp" />
     <ClCompile Include="Source\Student\Project_1\Leaf\L_Rotate.cpp" />
     <ClCompile Include="Source\Student\Project_1\Setup.cpp" />
     <ClCompile Include="Source\Student\Project_2\P2_Pathfinding.cpp" />

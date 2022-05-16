@@ -1,13 +1,14 @@
 #pragma once
 #include "BehaviorNode.h"
+#include "Misc/NiceTypes.h"
 
-class L_MoveToClosestVictim : public BaseNode<L_MoveToClosestVictim>
+class L_Ramming : public BaseNode<L_Ramming>
 {
 protected:
     virtual void on_enter() override;
     virtual void on_update(float dt) override;
 
 private:
-    Agent* target;
-    float baseSpeed;
+    Vec3 moveAng;
+    float ramSpeed;
 };

@@ -1,13 +1,12 @@
 #pragma once
 #include "BehaviorNode.h"
 
-class L_MoveToClosestVictim : public BaseNode<L_MoveToClosestVictim>
+class L_Jiggle : public BaseNode<L_Jiggle>
 {
 protected:
     virtual void on_enter() override;
     virtual void on_update(float dt) override;
 
 private:
-    Agent* target;
-    float baseSpeed;
+    float timer;
 };

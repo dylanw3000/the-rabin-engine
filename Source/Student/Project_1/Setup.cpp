@@ -11,7 +11,7 @@ void ProjectOne::setup()
 
     BehaviorAgent* predator = agents->create_behavior_agent("Predator", BehaviorTreeTypes::Predator, UnitType::Predator);
     predator->set_position(Vec3(100, 0, 0));
-    predator->set_movement_speed(16.f);
+    predator->set_movement_speed(20.f);
     predator->set_scaling(2.f);
 
     BehaviorAgent* tower1 = agents->create_behavior_agent("Tower 1", BehaviorTreeTypes::Tower_Animation, UnitType::Tower);
