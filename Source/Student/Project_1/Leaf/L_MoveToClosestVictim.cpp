@@ -6,7 +6,7 @@ void L_MoveToClosestVictim::on_enter()
 {
     // set animation, speed, etc
 
-    baseSpeed = agent->get_movement_speed();
+    pursuitSpeed = agent->get_movement_speed();
 
     // find the agent that is the furthest from this one
     float shortestDistance = std::numeric_limits<float>().max();
@@ -49,11 +49,16 @@ void L_MoveToClosestVictim::on_enter()
 void L_MoveToClosestVictim::on_update(float dt)
 {
     // agent->set_movement_speed(agent->get_movement_speed() + dt);
+    float tmp = agent->get_movement_speed();
+    pursuitSpeed += dt * 20.f;
+    agent->set_movement_speed(pursuitSpeed);
+
     const auto result = agent->move_toward_agent(target, dt);
+    
+    agent->set_movement_speed(tmp);
 
     if (result == true)
     {
-        agent->set_movement_speed(baseSpeed);
         on_success();
     }
 

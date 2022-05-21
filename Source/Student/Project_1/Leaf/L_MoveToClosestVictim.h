@@ -9,5 +9,5 @@ protected:
 
 private:
     Agent* target;
-    float baseSpeed;
+    float pursuitSpeed;
 };

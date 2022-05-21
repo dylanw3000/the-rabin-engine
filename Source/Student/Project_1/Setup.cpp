@@ -13,7 +13,7 @@ void ProjectOne::setup()
     agents->create_behavior_agent("Migrator 4", BehaviorTreeTypes::Ease, UnitType::Common)->set_position({ 0,0,100 });
 
     BehaviorAgent* predator = agents->create_behavior_agent("Predator", BehaviorTreeTypes::Predator, UnitType::Predator);
-    predator->set_position(Vec3(100, 0, 0));
+    predator->set_position(Vec3(50, 0, 50));
     predator->set_movement_speed(10.f);
     predator->set_scaling(2.f);
 
