@@ -60,5 +60,9 @@ void L_MigrateTowers::on_update(float dt)
     float a = (-cosf(time / maxTime * M_PI) + 1.f) / 2;
     agent->path_interp(startPoint, targetPoint, a);
 
+    Vec3 delta = targetPoint - agent->get_position();
+    const float yaw = std::atan2(delta.x, delta.z);
+    agent->set_yaw(yaw);
+
     display_leaf_text();
 }

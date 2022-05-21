@@ -44,6 +44,8 @@ public:
     const size_t &get_id() const;
 
     float get_movement_speed() const;
+
+    Vec3 get_knockback() { return knockbackVec; }
 #pragma endregion
 
 #pragma region Setters
@@ -58,6 +60,11 @@ public:
     void set_color(const Vec3 &newColor);
     
     void set_movement_speed(float speed);
+
+    void set_knockback(Vec3 ang) {
+        knockback = true;
+        knockbackVec = ang;
+    }
 #pragma endregion
 
     virtual void update(float dt);
@@ -71,6 +78,9 @@ private:
     bool isDirty;
 
     Vec3 color;
+
+    Vec3 knockbackVec;
+    bool knockback = false;
     
     const char *type;
     const size_t id;

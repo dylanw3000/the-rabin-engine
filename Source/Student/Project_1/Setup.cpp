@@ -5,13 +5,16 @@
 void ProjectOne::setup()
 {
     // Create your inital agents
-    agents->create_behavior_agent("ExampleAgent", BehaviorTreeTypes::Example, UnitType::Common);
-    agents->create_behavior_agent("Initial_Boi", BehaviorTreeTypes::Initial, UnitType::Common);
-    agents->create_behavior_agent("Easy", BehaviorTreeTypes::Ease, UnitType::Common);
+    // agents->create_behavior_agent("ExampleAgent", BehaviorTreeTypes::Example, UnitType::Common);
+    // agents->create_behavior_agent("Initial_Boi", BehaviorTreeTypes::Initial, UnitType::Common);
+    agents->create_behavior_agent("Migrator 1", BehaviorTreeTypes::Ease, UnitType::Common);
+    agents->create_behavior_agent("Migrator 2", BehaviorTreeTypes::Ease, UnitType::Common)->set_position({ 100,0,0 });
+    agents->create_behavior_agent("Migrator 3", BehaviorTreeTypes::Ease, UnitType::Common)->set_position({ 100,0,100 });
+    agents->create_behavior_agent("Migrator 4", BehaviorTreeTypes::Ease, UnitType::Common)->set_position({ 0,0,100 });
 
     BehaviorAgent* predator = agents->create_behavior_agent("Predator", BehaviorTreeTypes::Predator, UnitType::Predator);
     predator->set_position(Vec3(100, 0, 0));
-    predator->set_movement_speed(20.f);
+    predator->set_movement_speed(10.f);
     predator->set_scaling(2.f);
 
     BehaviorAgent* tower1 = agents->create_behavior_agent("Tower 1", BehaviorTreeTypes::Tower_Animation, UnitType::Tower);

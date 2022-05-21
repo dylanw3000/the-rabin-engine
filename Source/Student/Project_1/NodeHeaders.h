@@ -37,3 +37,8 @@
 #include "Leaf/L_MigrateTowers.h"
 #include "Leaf/L_Ramming.h"
 #include "Leaf/L_Jiggle.h"
+#include "Leaf/L_StepBackward.h"
+#include "Leaf/L_CollideCommon.h"
+#include "Leaf/L_CollideTower.h"
+#include "Leaf/L_CollidePredator.h"
+#include "Leaf/L_Knockback.h"

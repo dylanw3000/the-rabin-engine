@@ -25,7 +25,7 @@ BehaviorAgent::BehaviorAgent(const char *_type, size_t id, UnitType unitType) : 
 {
     const std::string temp(_type);
     debugName = std::wstring(temp.begin(), temp.end()) + debugNameSeparator + std::to_wstring(id);
-    set_movement_speed(10.0f);
+    set_movement_speed(8.f);
     type = unitType;
 }
 
