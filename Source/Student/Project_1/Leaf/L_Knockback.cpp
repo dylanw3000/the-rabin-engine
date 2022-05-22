@@ -21,7 +21,7 @@ void L_Knockback::on_enter()
     }
 
     startingPoint = agent->get_position();
-    targetPoint = startingPoint + agent->get_knockback() * float(RNG::d10() + 20);
+    targetPoint = startingPoint + agent->get_knockback() * float(RNG::d10() + 15);
     targetPoint.x = std::clamp(targetPoint.x, 0.f, 100.f);
     targetPoint.z = std::clamp(targetPoint.z, 0.f, 100.f);
     //agent->look_at_point(targetPoint);

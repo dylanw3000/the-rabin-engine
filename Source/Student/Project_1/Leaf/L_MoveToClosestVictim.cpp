@@ -57,7 +57,9 @@ void L_MoveToClosestVictim::on_update(float dt)
     
     agent->set_movement_speed(tmp);
 
-    if (result == true)
+    float dist = Vec3::DistanceSquared(agent->get_position(), target->get_position());
+
+    if (result == true || dist <= Vec3::DistanceSquared({ 0,0,0 }, agent->get_scaling()/2.f))
     {
         on_success();
     }

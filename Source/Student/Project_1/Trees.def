@@ -4,3 +4,4 @@
 #include "../Source/Student/Project_1/Trees/Initial.bht"
 #include "../Source/Student/Project_1/Trees/Predator.bht"
 #include "../Source/Student/Project_1/Trees/Tower_Animation.bht"
+#include "../Source/Student/Project_1/Trees/Wanderer.bht"
