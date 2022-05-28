@@ -1,6 +1,8 @@
 #pragma once
 #include "Misc/PathfindingDetails.hpp"
 
+#define GRID_SIZE 40
+
 class AStarPather
 {
 public:
@@ -22,5 +24,43 @@ public:
         It doesn't all need to be in this header and cpp, structure it whatever way
         makes sense to you.
     */
+
+    enum nodeState {
+        UNUSED,
+        OPEN,
+        CLOSED
+    };
+
+    enum neighborDirection {
+        RIGHT,
+        RIGHTDOWN,
+        DOWN,
+        LEFTDOWN,
+        LEFT,
+        LEFTUP,
+        UP,
+        RIGHTUP
+    };
+
+    struct Node {
+        Vec2 parent;
+        nodeState state = UNUSED;
+        GridPos pos;
+        float dist;
+        bool isWall = false;
+        bool neighbors[8];
+
+        bool operator<(const Node n) const {
+            return dist < n.dist;
+        }
+
+        bool operator>(const Node n) const {
+            return dist > n.dist;
+        }
+    };
+
+    Node nodeList[40][40];
+
+    std::priority_queue<Node*, std::vector<Node*>, std::greater<Node> > activeList;
 
 };

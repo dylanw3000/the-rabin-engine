@@ -15,6 +15,8 @@
 #include "Decorator/D_Delay.h"
 #include "Decorator/D_InvertedRepeater.h"
 #include "Decorator/D_RepeatFourTimes.h"
+#include "Decorator/D_Repeater.h"
+#include "Decorator/D_RepeatRandomTimes.h"
 
 // Student Decorator Nodes
 

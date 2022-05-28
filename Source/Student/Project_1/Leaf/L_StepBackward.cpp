@@ -2,6 +2,8 @@
 #include "L_StepBackward.h"
 #include "Agent/BehaviorAgent.h"
 
+// Stagger backwards based on your yaw
+// Special exceptions are granted if this would go outside of [0,100]
 void L_StepBackward::on_enter()
 {
     // set animation, speed, etc

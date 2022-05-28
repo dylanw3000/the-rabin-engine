@@ -2,13 +2,14 @@
 #include "L_CollideTower.h"
 #include "../Agent/BehaviorAgent.h"
 
+// Check for collision with any "tower"-type actor
 void L_CollideTower::on_update(float dt)
 {
     const auto allAgents = agents->get_all_agents();
 
     Vec3 myPos = agent->get_position();
     Vec3 myScale = agent->get_scaling();
-    float myRadius = myScale.x * myScale.x + myScale.z + myScale.z;
+    float myRadius = myScale.x * myScale.x + myScale.z * myScale.z;
 
     for (Agent* a : allAgents)
     {

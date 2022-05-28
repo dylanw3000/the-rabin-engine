@@ -61,6 +61,9 @@ struct GridPos
     int row;
     int col;
 
+    GridPos() {}
+    GridPos(int x, int y) : row(x), col(y) {}
+
     bool operator==(const GridPos &rhs) const
     {
         return row == rhs.row && col == rhs.col;

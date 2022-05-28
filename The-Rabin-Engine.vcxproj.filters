@@ -358,6 +358,12 @@
     <ClInclude Include="Source\Student\Project_1\Leaf\L_Knockback.h">
       <Filter>Source\Student\Project_1\Leaf</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Student\Project_1\Decorator\D_Repeater.h">
+      <Filter>Source\Student\Project_1\Decorator</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Student\Project_1\Decorator\D_RepeatRandomTimes.h">
+      <Filter>Source\Student\Project_1\Decorator</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Framework\Main.cpp">
@@ -617,6 +623,12 @@
     </ClCompile>
     <ClCompile Include="Source\Student\Project_1\Leaf\L_Knockback.cpp">
       <Filter>Source\Student\Project_1\Leaf</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Student\Project_1\Decorator\D_Repeater.cpp">
+      <Filter>Source\Student\Project_1\Decorator</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Student\Project_1\Decorator\D_RepeatRandomTimes.cpp">
+      <Filter>Source\Student\Project_1\Decorator</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

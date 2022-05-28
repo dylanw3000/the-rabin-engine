@@ -35,6 +35,44 @@ bool AStarPather::initialize()
         object that std::function can wrap will suffice.
     */
 
+    for (int x = 0; x < GRID_SIZE; x++) {
+        for (int y = 0; y < GRID_SIZE; y++) {
+            Node* n = &nodeList[x][y];
+            GridPos pos(x, y);
+            n->pos = pos;
+
+            if (terrain->is_wall(pos)) {
+                n->isWall = true;
+            }
+        }
+    }
+
+#if false
+    for (int x = 0; x < GRID_SIZE; x++) {
+        for (int y = 0; y < GRID_SIZE; y++) {
+            Node* n = &nodeList[x][y];
+
+            if (x == 0) {
+                n->neighbors[neighborDirection::LEFT] = n->neighbors[neighborDirection::LEFTDOWN] = n->neighbors[neighborDirection::LEFTUP] = false;
+            }
+
+            if (x == GRID_SIZE - 1) {
+                n->neighbors[neighborDirection::RIGHT] = n->neighbors[neighborDirection::RIGHTDOWN] = n->neighbors[neighborDirection::RIGHTUP] = false;
+            }
+
+            if (y == 0) {
+                n->neighbors[neighborDirection::UP] = n->neighbors[neighborDirection::LEFTUP] = n->neighbors[neighborDirection::RIGHTUP] = false;
+            }
+
+            if (y == GRID_SIZE - 1) {
+                n->neighbors[neighborDirection::DOWN] = n->neighbors[neighborDirection::LEFTDOWN] = n->neighbors[neighborDirection::RIGHTDOWN] = false;
+            }
+
+            if (n->neighbors[UP] && false) {}
+        }
+    }
+#endif
+
     return true; // return false if any errors actually occur, to stop engine initialization
 }
 
@@ -81,7 +119,21 @@ PathResult AStarPather::compute_path(PathRequest &request)
     */
 
     // WRITE YOUR CODE HERE
+    if (request.newRequest) {
+        GridPos start = terrain->get_grid_position(request.start);
+        GridPos goal = terrain->get_grid_position(request.goal);
 
+        if (terrain->is_wall(goal)) {
+            return PathResult::IMPOSSIBLE;
+        }
+
+        // if (terrain.get(goal)->is_wall);
+
+        terrain->set_color(start, Colors::Orange);
+        terrain->set_color(goal, Colors::Orange);
+
+
+    }
     
     // Just sample code, safe to delete
     GridPos start = terrain->get_grid_position(request.start);

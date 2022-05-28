@@ -2,6 +2,7 @@
 #include "L_Ramming.h"
 #include "Agent/BehaviorAgent.h"
 
+// Choose a direction and run, gaining progressively more speed until you would leave the [0,100] legal area
 void L_Ramming::on_enter()
 {
     // set animation, speed, etc
@@ -9,6 +10,7 @@ void L_Ramming::on_enter()
     ramSpeed = 0.f;
     moveAng = RNG::unit_vector_3D();
     moveAng.y = 0.f;
+    moveAng.Normalize();
     agent->set_yaw(atan2(moveAng.x, moveAng.z));
 
 	BehaviorNode::on_leaf_enter();

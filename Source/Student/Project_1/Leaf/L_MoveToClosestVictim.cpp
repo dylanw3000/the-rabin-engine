@@ -2,6 +2,7 @@
 #include "L_MoveToClosestVictim.h"
 #include "Agent/BehaviorAgent.h"
 
+// Chase down a "common"-type actor
 void L_MoveToClosestVictim::on_enter()
 {
     // set animation, speed, etc

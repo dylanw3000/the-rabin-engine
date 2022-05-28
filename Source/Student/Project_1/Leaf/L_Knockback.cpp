@@ -2,6 +2,8 @@
 #include "L_Knockback.h"
 #include "Agent/BehaviorAgent.h"
 
+// Get knocked back away from the Predator on the map
+// Knockback distance and duration selected at random
 void L_Knockback::on_enter()
 {
     // set animation, speed, etc

@@ -1,6 +1,7 @@
 #include <pch.h>
 #include "L_Float.h"
 
+// Float up then down on a sinusoidal wave
 void L_Float::on_enter()
 {
     timer = 0.f;

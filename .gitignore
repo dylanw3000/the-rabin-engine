@@ -34,4 +34,5 @@
 # Visual Studio Local Temp Files
 .vs/
 Debug/
+Release/
 *.cso

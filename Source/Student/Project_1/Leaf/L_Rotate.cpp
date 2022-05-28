@@ -1,6 +1,7 @@
 #include <pch.h>
 #include "L_Rotate.h"
 
+// Rotate the yaw
 void L_Rotate::on_enter()
 {
     timer = 0.f;

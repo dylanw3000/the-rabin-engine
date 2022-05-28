@@ -2,6 +2,7 @@
 #include "L_ExponentialToRandomPosition.h"
 #include "Agent/BehaviorAgent.h"
 
+// Choose a random position to move to with an exponentially-decaying speed
 void L_ExponentialToRandomPosition::on_enter()
 {
     // set animation, speed, etc

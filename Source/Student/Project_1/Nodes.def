@@ -7,6 +7,8 @@ REGISTER_CONTROLFLOW(C_EternalSequencer, "eternally")
 REGISTER_DECORATOR(D_Delay, "D_Delay")
 REGISTER_DECORATOR(D_InvertedRepeater, "D_InvertedRepeater")
 REGISTER_DECORATOR(D_RepeatFourTimes, "D_RepeatFourTimes")
+REGISTER_DECORATOR(D_Repeater, "Repeat until it breaks")
+REGISTER_DECORATOR(D_RepeatRandomTimes, "Repeat 1d6 times")
 
 REGISTER_LEAF(L_CheckMouseClick, "L_CheckMouseClick")
 REGISTER_LEAF(L_Idle, "L_Idle")

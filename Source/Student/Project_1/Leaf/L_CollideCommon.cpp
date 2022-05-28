@@ -2,13 +2,15 @@
 #include "L_CollideCommon.h"
 #include "../Agent/BehaviorAgent.h"
 
+// Check for collision with all "common"-type actors
+// When you collide, knock them back
 void L_CollideCommon::on_update(float dt)
 {
     const auto allAgents = agents->get_all_agents();
 
     Vec3 myPos = agent->get_position();
     Vec3 myScale = agent->get_scaling();
-    float myRadius = myScale.x * myScale.x + myScale.z + myScale.z;
+    float myRadius = myScale.x * myScale.x + myScale.z * myScale.z;
 
     for (Agent* a : allAgents)
     {

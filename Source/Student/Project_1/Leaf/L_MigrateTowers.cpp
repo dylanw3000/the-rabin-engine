@@ -2,6 +2,7 @@
 #include "L_MigrateTowers.h"
 #include "Agent/BehaviorAgent.h"
 
+// Move to the furtherst "tower"-type object
 void L_MigrateTowers::on_enter()
 {
     // set animation, speed, etc

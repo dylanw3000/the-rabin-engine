@@ -1,6 +1,7 @@
 #include <pch.h>
 #include "L_Jiggle.h"
 
+// Do the wiggle
 void L_Jiggle::on_enter()
 {
     timer = 0.f;
