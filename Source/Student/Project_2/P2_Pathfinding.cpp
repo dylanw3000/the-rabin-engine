@@ -46,6 +46,53 @@ void AStarPather::shutdown()
     */
 }
 
+void AStarPather::gridInitialize(float weight, GridPos start) {
+    int xx = start.row;
+    int yy = start.col;
+
+    for (int x = 0; x < GRID_SIZE; x++) {
+        for (int y = 0; y < GRID_SIZE; y++) {
+            map[x][y].position = GridPos(x, y);
+            map[x][y].given = sqrtf(powf(float(xx) - x, 2) + powf(float(yy) - y, 2)) * weight;
+            map[x][y].onList = ListType::Unused;
+            map[x][y].wall = terrain->is_wall(x, y);
+
+            map[x][y].neighbors.clear();
+            map[x][y].diagonals.clear();
+        }
+    }
+
+    for (int x = 0; x < GRID_SIZE; x++) {
+        for (int y = 0; y < GRID_SIZE; y++) {
+            Node* n = &map[x][y];
+            bool xminus = true;
+            bool xplus = true;
+            bool yminus = true;
+            bool yplus = true;
+
+            if (x == 0 || map[x - 1][y].wall) xminus = false;
+            if (y == 0 || map[x][y - 1].wall) yminus = false;
+            if (x == GRID_SIZE - 1 || map[x + 1][y].wall) xplus = false;
+            if (y == GRID_SIZE - 1 || map[x][y + 1].wall) yplus = false;
+
+            if (xminus) n->neighbors.push_back(&map[x - 1][y]);
+            if (yminus) n->neighbors.push_back(&map[x][y - 1]);
+            if (xplus) n->neighbors.push_back(&map[x + 1][y]);
+            if (yplus) n->neighbors.push_back(&map[x][y + 1]);
+
+            if (xplus && yplus) n->diagonals.push_back(&map[x + 1][y + 1]);
+            if (xplus && yminus) n->diagonals.push_back(&map[x + 1][y - 1]);
+            if (xminus && yminus) n->diagonals.push_back(&map[x - 1][y - 1]);
+            if (xminus && yplus) n->diagonals.push_back(&map[x - 1][y + 1]);
+        }
+    }
+}
+
+void AStarPather::PushNode(Node* n, float cost) {
+    n->cost = cost;
+    openList.push_back(n);
+}
+
 PathResult AStarPather::compute_path(PathRequest &request)
 {
     /*
@@ -81,6 +128,49 @@ PathResult AStarPather::compute_path(PathRequest &request)
     */
 
     // WRITE YOUR CODE HERE
+    
+    
+    if (request.newRequest) {
+        GridPos start = terrain->get_grid_position(request.start);
+        GridPos goal = terrain->get_grid_position(request.goal);
+
+        terrain->set_color(start, Colors::Orange);
+        terrain->set_color(goal, Colors::Orange);
+
+        gridInitialize(request.settings.weight, start);
+
+        openList.clear();
+        PushNode(getNode(start), 0.f);
+
+        // request.path.push_back(request.start);
+        // request.path.push_back(request.goal);
+    }
+
+    while (openList.size() > 0) {
+        Node* activeNode = nullptr;
+        int activeIndex = -1;
+
+        float minCost = 99999.f;
+        for (int i = 0; i < openList.size(); i++) {
+            Node* n = openList[i];
+            if (n->given < minCost) {
+                minCost = n->cost;
+                activeNode = n;
+                activeIndex = i;
+            }
+        }
+
+        if (!activeNode) { return PathResult::IMPOSSIBLE; }
+
+        request.path.push_back(terrain->get_world_position(activeNode->position));
+        openList.erase(openList.begin() + activeIndex);
+
+        if (request.settings.singleStep) { return PathResult::PROCESSING; }
+    }
+
+    request.path.push_back(request.goal);
+    return PathResult::COMPLETE;
+    
 
     
     // Just sample code, safe to delete

@@ -58,6 +58,9 @@ struct WindowPos
 
 struct GridPos
 {
+    GridPos() : row(0), col(0) {}
+    GridPos(int x, int y) : row(x), col(y) {}
+
     int row;
     int col;
 

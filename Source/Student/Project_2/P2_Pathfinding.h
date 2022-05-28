@@ -1,6 +1,8 @@
 #pragma once
 #include "Misc/PathfindingDetails.hpp"
 
+#define GRID_SIZE 40
+
 class AStarPather
 {
 public:
@@ -23,4 +25,30 @@ public:
         makes sense to you.
     */
 
+    
+    enum ListType : int {
+        Unused,
+        Open,
+        Closed
+    };
+
+    struct Node {
+        GridPos position;
+        int xParent, yParent; // Parent
+        float cost; // Total cost
+        float given; // Given cost
+        ListType onList = Unused; // On open/closed list?
+        bool wall;
+
+        std::vector<Node*> neighbors;
+        std::vector<Node*> diagonals;
+    };
+
+    Node map[GRID_SIZE][GRID_SIZE];
+    std::vector<Node*> openList;
+
+    void gridInitialize(float weight, GridPos start);
+    Node* getNode(GridPos pos) { return &map[pos.row][pos.col]; }
+    void PushNode(Node* n, float cost);
+    
 };
