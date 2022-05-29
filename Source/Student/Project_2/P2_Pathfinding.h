@@ -49,6 +49,6 @@ public:
 
     void gridInitialize(float weight, GridPos start);
     Node* getNode(GridPos pos) { return &map[pos.row][pos.col]; }
-    void PushNode(Node* n, float cost);
+    void PushNode(Node* n, float cost, Node* prev, PathRequest& request);
     
 };

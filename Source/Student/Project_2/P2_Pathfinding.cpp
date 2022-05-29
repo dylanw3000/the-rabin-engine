@@ -46,9 +46,9 @@ void AStarPather::shutdown()
     */
 }
 
-void AStarPather::gridInitialize(float weight, GridPos start) {
-    int xx = start.row;
-    int yy = start.col;
+void AStarPather::gridInitialize(float weight, GridPos goal) {
+    int xx = goal.row;
+    int yy = goal.col;
 
     for (int x = 0; x < GRID_SIZE; x++) {
         for (int y = 0; y < GRID_SIZE; y++) {
@@ -65,6 +65,8 @@ void AStarPather::gridInitialize(float weight, GridPos start) {
     for (int x = 0; x < GRID_SIZE; x++) {
         for (int y = 0; y < GRID_SIZE; y++) {
             Node* n = &map[x][y];
+            if (n->wall) continue;
+
             bool xminus = true;
             bool xplus = true;
             bool yminus = true;
@@ -88,12 +90,17 @@ void AStarPather::gridInitialize(float weight, GridPos start) {
     }
 }
 
-void AStarPather::PushNode(Node* n, float cost) {
+void AStarPather::PushNode(Node* n, float cost, Node* prev, PathRequest& request) {
     n->cost = cost;
     n->onList = ListType::Open;
+    n->xParent = prev->position.row;
+    n->yParent = prev->position.col;
     openList.push_back(n);
 
     terrain->set_color(n->position, Colors::Blue);
+    if (n->position == terrain->get_grid_position(request.start) || n->position == terrain->get_grid_position(request.goal)) {
+        terrain->set_color(n->position, Colors::Orange);
+    }
 }
 
 PathResult AStarPather::compute_path(PathRequest &request)
@@ -137,16 +144,19 @@ PathResult AStarPather::compute_path(PathRequest &request)
         GridPos start = terrain->get_grid_position(request.start);
         GridPos goal = terrain->get_grid_position(request.goal);
 
+        gridInitialize(request.settings.weight, goal);
+
+        openList.clear();
+        PushNode(getNode(start), 0.f, getNode(start), request);
+
         terrain->set_color(start, Colors::Orange);
         terrain->set_color(goal, Colors::Orange);
 
-        gridInitialize(request.settings.weight, start);
-
-        openList.clear();
-        PushNode(getNode(start), 0.f);
-
-        // request.path.push_back(request.start);
-        // request.path.push_back(request.goal);
+        if (terrain->is_wall(start)) {
+            request.path.push_back(request.start);
+            request.path.push_back(request.goal);
+            return PathResult::COMPLETE;
+        }
     }
 
     while (openList.size() > 0) {
@@ -168,31 +178,33 @@ PathResult AStarPather::compute_path(PathRequest &request)
         // request.path.push_back(terrain->get_world_position(activeNode->position));
         openList.erase(openList.begin() + activeIndex);
         activeNode->onList = ListType::Closed;
-        if (activeNode->position != terrain->get_grid_position(request.start)) {
-            terrain->set_color(activeNode->position, Colors::Gray);
+        terrain->set_color(activeNode->position, Colors::Gray);
+
+        if (activeNode->position == terrain->get_grid_position(request.start) || activeNode->position == terrain->get_grid_position(request.goal)) {
+            terrain->set_color(activeNode->position, Colors::Orange);
         }
 
-        if (activeNode->position == terrain->get_grid_position(request.goal)) { return PathResult::COMPLETE; }
+        if (activeNode->position == terrain->get_grid_position(request.goal)) { break; }
 
         for (auto n : activeNode->neighbors) {
-            float dist = n->given + activeNode->cost + 1.f;
+            float dist = activeNode->cost + 1.f;
             if (n->onList == ListType::Unused) {
-                PushNode(n, dist);
+                PushNode(n, dist, activeNode, request);
             }
-            else if (n->onList == ListType::Open && n->cost > dist) {
+            else if (n->onList == ListType::Open && dist < n->cost) {
                 n->cost = dist;
                 n->xParent = activeNode->position.row;
                 n->yParent = activeNode->position.col;
             }
-            else if (n->onList == ListType::Closed && n->cost > dist) {
-                PushNode(n, dist);
+            else if (n->onList == ListType::Closed && dist < n->cost) {
+                PushNode(n, dist, activeNode, request);
             }
         }
 
         for (auto n : activeNode->diagonals) {
-            float dist = n->given + activeNode->cost + sqrtf(2.f);
+            float dist = activeNode->cost + sqrtf(2.f);
             if (n->onList == ListType::Unused) {
-                PushNode(n, dist);
+                PushNode(n, dist, activeNode, request);
             }
             else if (n->onList == ListType::Open && n->cost > dist) {
                 n->cost = dist;
@@ -200,7 +212,7 @@ PathResult AStarPather::compute_path(PathRequest &request)
                 n->yParent = activeNode->position.col;
             }
             else if (n->onList == ListType::Closed && n->cost > dist) {
-                PushNode(n, dist);
+                PushNode(n, dist, activeNode, request);
             }
         }
 
@@ -222,11 +234,29 @@ PathResult AStarPather::compute_path(PathRequest &request)
         if (request.settings.singleStep) { return PathResult::PROCESSING; }
     }
 
-    request.path.push_back(request.goal);
+    std::vector<Vec3> path;
+
+    Node* n = getNode(terrain->get_grid_position(request.goal));
+    GridPos start = terrain->get_grid_position(request.start);
+    path.push_back(terrain->get_world_position(n->position));
+    //request.path.push_back(terrain->get_world_position(n->position));
+
+    while (n->position != start) {
+        n = &map[n->xParent][n->yParent];
+        path.push_back(terrain->get_world_position(n->position));
+        //request.path.push_back(terrain->get_world_position(n->position));
+    }
+
+    while (path.size() > 0) {
+        request.path.push_back(path[path.size() - 1]);
+        path.pop_back();
+    }
+    // request.path.push_back(request.goal);
     return PathResult::COMPLETE;
     
 
     
+#if false
     // Just sample code, safe to delete
     GridPos start = terrain->get_grid_position(request.start);
     GridPos goal = terrain->get_grid_position(request.goal);
@@ -235,4 +265,5 @@ PathResult AStarPather::compute_path(PathRequest &request)
     request.path.push_back(request.start);
     request.path.push_back(request.goal);
     return PathResult::COMPLETE;
+#endif
 }
