@@ -80,17 +80,20 @@ void AStarPather::gridInitialize(float weight, GridPos start) {
             if (xplus) n->neighbors.push_back(&map[x + 1][y]);
             if (yplus) n->neighbors.push_back(&map[x][y + 1]);
 
-            if (xplus && yplus) n->diagonals.push_back(&map[x + 1][y + 1]);
-            if (xplus && yminus) n->diagonals.push_back(&map[x + 1][y - 1]);
-            if (xminus && yminus) n->diagonals.push_back(&map[x - 1][y - 1]);
-            if (xminus && yplus) n->diagonals.push_back(&map[x - 1][y + 1]);
+            if (xplus && yplus && !map[x + 1][y + 1].wall) n->diagonals.push_back(&map[x + 1][y + 1]);
+            if (xplus && yminus && !map[x + 1][y - 1].wall) n->diagonals.push_back(&map[x + 1][y - 1]);
+            if (xminus && yminus && !map[x - 1][y - 1].wall) n->diagonals.push_back(&map[x - 1][y - 1]);
+            if (xminus && yplus && !map[x - 1][y + 1].wall) n->diagonals.push_back(&map[x - 1][y + 1]);
         }
     }
 }
 
 void AStarPather::PushNode(Node* n, float cost) {
     n->cost = cost;
+    n->onList = ListType::Open;
     openList.push_back(n);
+
+    terrain->set_color(n->position, Colors::Blue);
 }
 
 PathResult AStarPather::compute_path(PathRequest &request)
@@ -153,17 +156,68 @@ PathResult AStarPather::compute_path(PathRequest &request)
         float minCost = 99999.f;
         for (int i = 0; i < openList.size(); i++) {
             Node* n = openList[i];
-            if (n->given < minCost) {
+            if (n->cost < minCost) {
                 minCost = n->cost;
                 activeNode = n;
                 activeIndex = i;
             }
         }
 
-        if (!activeNode) { return PathResult::IMPOSSIBLE; }
+        // if (!activeNode) { return PathResult::IMPOSSIBLE; }
 
-        request.path.push_back(terrain->get_world_position(activeNode->position));
+        // request.path.push_back(terrain->get_world_position(activeNode->position));
         openList.erase(openList.begin() + activeIndex);
+        activeNode->onList = ListType::Closed;
+        if (activeNode->position != terrain->get_grid_position(request.start)) {
+            terrain->set_color(activeNode->position, Colors::Gray);
+        }
+
+        if (activeNode->position == terrain->get_grid_position(request.goal)) { return PathResult::COMPLETE; }
+
+        for (auto n : activeNode->neighbors) {
+            float dist = n->given + activeNode->cost + 1.f;
+            if (n->onList == ListType::Unused) {
+                PushNode(n, dist);
+            }
+            else if (n->onList == ListType::Open && n->cost > dist) {
+                n->cost = dist;
+                n->xParent = activeNode->position.row;
+                n->yParent = activeNode->position.col;
+            }
+            else if (n->onList == ListType::Closed && n->cost > dist) {
+                PushNode(n, dist);
+            }
+        }
+
+        for (auto n : activeNode->diagonals) {
+            float dist = n->given + activeNode->cost + sqrtf(2.f);
+            if (n->onList == ListType::Unused) {
+                PushNode(n, dist);
+            }
+            else if (n->onList == ListType::Open && n->cost > dist) {
+                n->cost = dist;
+                n->xParent = activeNode->position.row;
+                n->yParent = activeNode->position.col;
+            }
+            else if (n->onList == ListType::Closed && n->cost > dist) {
+                PushNode(n, dist);
+            }
+        }
+
+#if false
+        for (int x = 0; x < GRID_SIZE; x++) {
+            for (int y = 0; y < GRID_SIZE; y++) {
+                if (map[x][y].onList != ListType::Unused) {
+                    if (map[x][y].onList == ListType::Open) {
+                        terrain->set_color(map[x][y].position, Colors::Blue);
+                    }
+                    else {
+                        terrain->set_color(map[x][y].position, Colors::Gray);
+                    }
+                }
+            }
+        }
+#endif
 
         if (request.settings.singleStep) { return PathResult::PROCESSING; }
     }
