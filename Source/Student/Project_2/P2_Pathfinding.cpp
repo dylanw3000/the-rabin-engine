@@ -47,21 +47,38 @@ void AStarPather::shutdown()
 }
 
 int GRID_SIZE = MAP_SIZE;
-void AStarPather::gridInitialize(float weight, GridPos goal) {
+void AStarPather::gridInitialize(float weight, PathRequest request) {
+    GridPos goal = terrain->get_grid_position(request.goal);
     int xx = goal.row;
     int yy = goal.col;
 
     for (int x = 0; x < GRID_SIZE; x++) {
         for (int y = 0; y < GRID_SIZE; y++) {
             map[x][y].position = GridPos(x, y);
-            map[x][y].given = sqrtf(float((xx - x) * (xx - x) + (yy - y) * (yy - y))) * weight;
-            // map[x][y].given = 1.f;
             map[x][y].onList = ListType::Unused;
             map[x][y].wall = terrain->is_wall(x, y);
             map[x][y].parent = nullptr;
 
             map[x][y].neighbors.clear();
             map[x][y].diagonals.clear();
+
+            // map[x][y].given = sqrtf(float((xx - x) * (xx - x) + (yy - y) * (yy - y))) * weight;
+            float xDiff = fabsf(float(xx) - x);
+            float yDiff = fabsf(float(yy) - y);
+            switch (request.settings.heuristic) {
+                case Heuristic::MANHATTAN:
+                    map[x][y].given = xDiff + yDiff;
+                    break;
+                case Heuristic::CHEBYSHEV:
+                    map[x][y].given = std::max(xDiff, yDiff);
+                    break;
+                case Heuristic::EUCLIDEAN:
+                    map[x][y].given = sqrtf(xDiff * xDiff + yDiff * yDiff);
+                    break;
+                case Heuristic::OCTILE:
+                default:
+                    map[x][y].given = std::min(xDiff, yDiff) * sqrtf(2.f) + std::max(xDiff, yDiff) - std::min(xDiff, yDiff);
+            }
         }
     }
 
@@ -93,7 +110,7 @@ void AStarPather::gridInitialize(float weight, GridPos goal) {
     }
 }
 
-void AStarPather::PushNode(Node* n, float cost, Node* prev, PathRequest& request) {
+void AStarPather::PushNode(Node* n, float cost, Node* prev, PathRequest request) {
     n->cost = cost;
     n->onList = ListType::Open;
     n->parent = prev;
@@ -153,7 +170,7 @@ PathResult AStarPather::compute_path(PathRequest &request)
         if(terrain->is_wall(start) || terrain->is_wall(goal)) { return PathResult::IMPOSSIBLE; }
 
         GRID_SIZE = terrain->get_map_width();
-        gridInitialize(request.settings.weight, goal);
+        gridInitialize(request.settings.weight, request);
 
         openList.clear();
         PushNode(getNode(start), 0.f, nullptr, request);
