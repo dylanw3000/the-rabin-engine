@@ -34,7 +34,7 @@ public:
 
     struct Node {
         GridPos position;
-        Node* parent;
+        Node* parent = nullptr;
         int xParent, yParent; // Parent
         float cost; // Total cost
         float given; // Given cost
@@ -52,5 +52,8 @@ public:
     void gridInitialize(float weight, GridPos start);
     Node* getNode(GridPos pos) { return &map[pos.row][pos.col]; }
     void PushNode(Node* n, float cost, Node* prev, PathRequest& request);
+
+    Vec3 pathArray[2000];
+    int pathsize = 0;
     
 };

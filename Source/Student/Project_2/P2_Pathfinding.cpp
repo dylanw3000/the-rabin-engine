@@ -58,6 +58,7 @@ void AStarPather::gridInitialize(float weight, GridPos goal) {
             // map[x][y].given = 1.f;
             map[x][y].onList = ListType::Unused;
             map[x][y].wall = terrain->is_wall(x, y);
+            map[x][y].parent = nullptr;
 
             map[x][y].neighbors.clear();
             map[x][y].diagonals.clear();
@@ -96,8 +97,10 @@ void AStarPather::PushNode(Node* n, float cost, Node* prev, PathRequest& request
     n->cost = cost;
     n->onList = ListType::Open;
     n->parent = prev;
-    n->xParent = prev->position.row;
-    n->yParent = prev->position.col;
+    if (prev) {
+        n->xParent = prev->position.row;
+        n->yParent = prev->position.col;
+    }
     openList.push_back(n);
 
     terrain->set_color(n->position, Colors::Blue);
@@ -147,10 +150,13 @@ PathResult AStarPather::compute_path(PathRequest &request)
         GridPos start = terrain->get_grid_position(request.start);
         GridPos goal = terrain->get_grid_position(request.goal);
 
+        if(terrain->is_wall(start) || terrain->is_wall(goal)) { return PathResult::IMPOSSIBLE; }
+
+        GRID_SIZE = terrain->get_map_width();
         gridInitialize(request.settings.weight, goal);
 
         openList.clear();
-        PushNode(getNode(start), 0.f, getNode(start), request);
+        PushNode(getNode(start), 0.f, nullptr, request);
 
         terrain->set_color(start, Colors::Orange);
         terrain->set_color(goal, Colors::Orange);
@@ -192,6 +198,8 @@ PathResult AStarPather::compute_path(PathRequest &request)
 
             Node* n = activeNode;
             GridPos start = terrain->get_grid_position(request.start);
+
+#if true
             path.push_back(terrain->get_world_position(n->position));
             //request.path.push_back(terrain->get_world_position(n->position));
 
@@ -207,8 +215,23 @@ PathResult AStarPather::compute_path(PathRequest &request)
                 path.pop_back();
             }
             // request.path.push_back(request.goal);
-            
+
             path.clear();
+            
+#else
+
+            pathArray[0] = terrain->get_world_position(n->position);
+            pathsize = 1;
+
+            while (n != nullptr && n->parent != nullptr && n->position != start) {
+                pathArray[pathsize++] = terrain->get_world_position(n->position);
+                n = n->parent;
+            }
+
+            while (pathsize > 0) {
+                request.path.push_back(pathArray[pathsize--]);
+            }
+#endif
 
             return PathResult::COMPLETE;
         }
@@ -244,21 +267,6 @@ PathResult AStarPather::compute_path(PathRequest &request)
                 PushNode(n, dist, activeNode, request);
             }
         }
-
-#if false
-        for (int x = 0; x < GRID_SIZE; x++) {
-            for (int y = 0; y < GRID_SIZE; y++) {
-                if (map[x][y].onList != ListType::Unused) {
-                    if (map[x][y].onList == ListType::Open) {
-                        terrain->set_color(map[x][y].position, Colors::Blue);
-                    }
-                    else {
-                        terrain->set_color(map[x][y].position, Colors::Yellow);
-                    }
-                }
-            }
-        }
-#endif
 
         if (request.settings.singleStep) { return PathResult::PROCESSING; }
     }
