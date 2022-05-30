@@ -46,6 +46,7 @@ void AStarPather::shutdown()
     */
 }
 
+int GRID_SIZE = MAP_SIZE;
 void AStarPather::gridInitialize(float weight, GridPos goal) {
     int xx = goal.row;
     int yy = goal.col;
@@ -53,7 +54,8 @@ void AStarPather::gridInitialize(float weight, GridPos goal) {
     for (int x = 0; x < GRID_SIZE; x++) {
         for (int y = 0; y < GRID_SIZE; y++) {
             map[x][y].position = GridPos(x, y);
-            map[x][y].given = sqrtf(powf(float(xx) - x, 2) + powf(float(yy) - y, 2)) * weight;
+            map[x][y].given = sqrtf(float((xx - x) * (xx - x) + (yy - y) * (yy - y))) * weight;
+            // map[x][y].given = 1.f;
             map[x][y].onList = ListType::Unused;
             map[x][y].wall = terrain->is_wall(x, y);
 
@@ -93,6 +95,7 @@ void AStarPather::gridInitialize(float weight, GridPos goal) {
 void AStarPather::PushNode(Node* n, float cost, Node* prev, PathRequest& request) {
     n->cost = cost;
     n->onList = ListType::Open;
+    n->parent = prev;
     n->xParent = prev->position.row;
     n->yParent = prev->position.col;
     openList.push_back(n);
@@ -166,8 +169,8 @@ PathResult AStarPather::compute_path(PathRequest &request)
         float minCost = 99999.f;
         for (int i = 0; i < openList.size(); i++) {
             Node* n = openList[i];
-            if (n->cost < minCost) {
-                minCost = n->cost;
+            if (n->cost+n->given < minCost) {
+                minCost = n->cost + n->given;
                 activeNode = n;
                 activeIndex = i;
             }
@@ -178,13 +181,37 @@ PathResult AStarPather::compute_path(PathRequest &request)
         // request.path.push_back(terrain->get_world_position(activeNode->position));
         openList.erase(openList.begin() + activeIndex);
         activeNode->onList = ListType::Closed;
-        terrain->set_color(activeNode->position, Colors::Gray);
+        terrain->set_color(activeNode->position, Colors::Yellow);
 
         if (activeNode->position == terrain->get_grid_position(request.start) || activeNode->position == terrain->get_grid_position(request.goal)) {
             terrain->set_color(activeNode->position, Colors::Orange);
         }
 
-        if (activeNode->position == terrain->get_grid_position(request.goal)) { break; }
+        if (activeNode->position == terrain->get_grid_position(request.goal)) { // path complete
+            // std::vector<Vec3> path;
+
+            Node* n = activeNode;
+            GridPos start = terrain->get_grid_position(request.start);
+            path.push_back(terrain->get_world_position(n->position));
+            //request.path.push_back(terrain->get_world_position(n->position));
+
+            while (n->position != start) {
+                n = n->parent;
+                // n = &map[n->xParent][n->yParent];
+                path.push_back(terrain->get_world_position(n->position));
+                //request.path.push_back(terrain->get_world_position(n->position));
+            }
+
+            while (path.size() > 0) {
+                request.path.push_back(path[path.size() - 1]);
+                path.pop_back();
+            }
+            // request.path.push_back(request.goal);
+            
+            path.clear();
+
+            return PathResult::COMPLETE;
+        }
 
         for (auto n : activeNode->neighbors) {
             float dist = activeNode->cost + 1.f;
@@ -195,6 +222,7 @@ PathResult AStarPather::compute_path(PathRequest &request)
                 n->cost = dist;
                 n->xParent = activeNode->position.row;
                 n->yParent = activeNode->position.col;
+                n->parent = activeNode;
             }
             else if (n->onList == ListType::Closed && dist < n->cost) {
                 PushNode(n, dist, activeNode, request);
@@ -210,6 +238,7 @@ PathResult AStarPather::compute_path(PathRequest &request)
                 n->cost = dist;
                 n->xParent = activeNode->position.row;
                 n->yParent = activeNode->position.col;
+                n->parent = activeNode;
             }
             else if (n->onList == ListType::Closed && n->cost > dist) {
                 PushNode(n, dist, activeNode, request);
@@ -224,7 +253,7 @@ PathResult AStarPather::compute_path(PathRequest &request)
                         terrain->set_color(map[x][y].position, Colors::Blue);
                     }
                     else {
-                        terrain->set_color(map[x][y].position, Colors::Gray);
+                        terrain->set_color(map[x][y].position, Colors::Yellow);
                     }
                 }
             }
@@ -234,25 +263,7 @@ PathResult AStarPather::compute_path(PathRequest &request)
         if (request.settings.singleStep) { return PathResult::PROCESSING; }
     }
 
-    std::vector<Vec3> path;
-
-    Node* n = getNode(terrain->get_grid_position(request.goal));
-    GridPos start = terrain->get_grid_position(request.start);
-    path.push_back(terrain->get_world_position(n->position));
-    //request.path.push_back(terrain->get_world_position(n->position));
-
-    while (n->position != start) {
-        n = &map[n->xParent][n->yParent];
-        path.push_back(terrain->get_world_position(n->position));
-        //request.path.push_back(terrain->get_world_position(n->position));
-    }
-
-    while (path.size() > 0) {
-        request.path.push_back(path[path.size() - 1]);
-        path.pop_back();
-    }
-    // request.path.push_back(request.goal);
-    return PathResult::COMPLETE;
+    return PathResult::IMPOSSIBLE;
     
 
     

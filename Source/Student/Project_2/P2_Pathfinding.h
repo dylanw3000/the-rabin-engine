@@ -1,7 +1,7 @@
 #pragma once
 #include "Misc/PathfindingDetails.hpp"
 
-#define GRID_SIZE 40
+#define MAP_SIZE 40
 
 class AStarPather
 {
@@ -34,6 +34,7 @@ public:
 
     struct Node {
         GridPos position;
+        Node* parent;
         int xParent, yParent; // Parent
         float cost; // Total cost
         float given; // Given cost
@@ -44,8 +45,9 @@ public:
         std::vector<Node*> diagonals;
     };
 
-    Node map[GRID_SIZE][GRID_SIZE];
+    Node map[MAP_SIZE][MAP_SIZE];
     std::vector<Node*> openList;
+    std::vector<Vec3> path;
 
     void gridInitialize(float weight, GridPos start);
     Node* getNode(GridPos pos) { return &map[pos.row][pos.col]; }
