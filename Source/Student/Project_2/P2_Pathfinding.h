@@ -52,8 +52,5 @@ public:
     void gridInitialize(float weight, PathRequest request);
     Node* getNode(GridPos pos) { return &map[pos.row][pos.col]; }
     void PushNode(Node* n, float cost, Node* prev, PathRequest request);
-
-    Vec3 pathArray[2000];
-    int pathsize = 0;
     
 };

@@ -79,6 +79,7 @@ void AStarPather::gridInitialize(float weight, PathRequest request) {
                 default:
                     map[x][y].given = std::min(xDiff, yDiff) * sqrtf(2.f) + std::max(xDiff, yDiff) - std::min(xDiff, yDiff);
             }
+            map[x][y].given *= weight;
         }
     }
 
@@ -211,44 +212,70 @@ PathResult AStarPather::compute_path(PathRequest &request)
         }
 
         if (activeNode->position == terrain->get_grid_position(request.goal)) { // path complete
-            // std::vector<Vec3> path;
-
             Node* n = activeNode;
             GridPos start = terrain->get_grid_position(request.start);
 
-#if true
-            path.push_back(terrain->get_world_position(n->position));
-            //request.path.push_back(terrain->get_world_position(n->position));
+            if (request.settings.rubberBanding) {
+                int xmin, ymin, xmax, ymax;
+                
+                while (n->position != start) {
+                    Node* n1 = n->parent;
+                    if (n1 == nullptr) break;
+                    Node* n2 = n1->parent;
+                    if (n2 == nullptr) break;
+                    
+                    xmin = std::min(n->position.row, std::min(n1->position.row, n2->position.row));
+                    xmax = std::max(n->position.row, std::max(n1->position.row, n2->position.row));
 
+                    ymin = std::min(n->position.col, std::min(n1->position.col, n2->position.col));
+                    ymax = std::max(n->position.col, std::max(n1->position.col, n2->position.col));
+
+                    bool valid = true;
+                    for (int x = xmin; x <= xmax; x++) {
+                        for (int y = ymin; y <= ymax; y++) {
+                            if (map[x][y].wall) {
+                                valid = false;
+                                break;
+                            }
+                        }
+                        if (!valid) break;
+                    }
+
+                    if (valid) {
+                        n->parent = n2;
+                    }
+                    else {
+                        n = n1;
+                    }
+                }
+            }
+
+
+            path.clear();
+            path.push_back(terrain->get_world_position(n->position));
+            n = activeNode;
             while (n->position != start) {
                 n = n->parent;
-                // n = &map[n->xParent][n->yParent];
                 path.push_back(terrain->get_world_position(n->position));
-                //request.path.push_back(terrain->get_world_position(n->position));
             }
+
+            /*
+            std::vector<Vec3> rubberPath;
+            Vec3 v1, v2, v3, v4;
+            int xmin, ymin, xmax, ymax;
+            if (request.settings.rubberBanding) {
+                for (int i = 0; i < path.size()-2; i++) {
+                    xmin = std::min(path[i].x,)
+                    xmin = xmax = path[i].x;
+                    ymin = ymax = path[i].y;
+                }
+            }
+            */
 
             while (path.size() > 0) {
                 request.path.push_back(path[path.size() - 1]);
                 path.pop_back();
             }
-            // request.path.push_back(request.goal);
-
-            path.clear();
-            
-#else
-
-            pathArray[0] = terrain->get_world_position(n->position);
-            pathsize = 1;
-
-            while (n != nullptr && n->parent != nullptr && n->position != start) {
-                pathArray[pathsize++] = terrain->get_world_position(n->position);
-                n = n->parent;
-            }
-
-            while (pathsize > 0) {
-                request.path.push_back(pathArray[pathsize--]);
-            }
-#endif
 
             return PathResult::COMPLETE;
         }
