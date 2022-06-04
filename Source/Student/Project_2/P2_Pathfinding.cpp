@@ -214,6 +214,10 @@ PathResult AStarPather::compute_path(PathRequest &request)
         if (activeNode->position == terrain->get_grid_position(request.goal)) { // path complete
             Node* n = activeNode;
             GridPos start = terrain->get_grid_position(request.start);
+            GridPos goal = terrain->get_grid_position(request.goal);
+
+            path.clear();
+            path.push_back(terrain->get_world_position(n->position));
 
             if (request.settings.rubberBanding) {
                 int xmin, ymin, xmax, ymax;
@@ -250,13 +254,63 @@ PathResult AStarPather::compute_path(PathRequest &request)
                 }
             }
 
-
-            path.clear();
-            path.push_back(terrain->get_world_position(n->position));
             n = activeNode;
-            while (n->position != start) {
-                n = n->parent;
-                path.push_back(terrain->get_world_position(n->position));
+            if (request.settings.smoothing) {
+                std::vector<Vec3> positions;
+                float maxDist = 1.5f * Vec3::Distance(terrain->get_world_position(map[0][0].position), terrain->get_world_position(map[0][1].position));
+
+                positions.push_back(Pos(n));
+                while (n->parent != nullptr) {
+                    Vec3 v1 = Pos(n);
+                    Vec3 v2 = Pos(n->parent);
+                    
+                    Vec3 path = v2 - v1;
+                    int multiple = 1;
+
+                    while (path.Length() > maxDist) {
+                        path /= 2.f;
+                        multiple *= 2;
+                    }
+
+                    for (int i = 0; i < multiple; i++) {
+                        positions.push_back(v1 + path * float(i));
+                    }
+
+                    n = n->parent;
+                }
+
+                std::reverse(positions.begin(), positions.end());
+
+                request.path.push_back(positions[0]);
+                for (int i = 0; i < positions.size() - 2; i++) {
+                    Vec3 v1;
+                    if (i == 0) {
+                        v1 = positions[0];
+                    }
+                    else {
+                        v1 = positions[i - 1];
+                    }
+                    Vec3 v2 = positions[i];
+                    Vec3 v3 = positions[i + 1];
+                    Vec3 v4;
+                    if (i == positions.size() - 2) {
+                        v4 = positions[i + 1];
+                    }
+                    else {
+                        v4 = positions[i + 2];
+                    }
+
+                    request.path.push_back(Vec3::CatmullRom(v1, v2, v3, v4, 0.25f));
+                    request.path.push_back(Vec3::CatmullRom(v1, v2, v3, v4, 0.5f));
+                    request.path.push_back(Vec3::CatmullRom(v1, v2, v3, v4, 0.75f));
+                    request.path.push_back(v3);
+                }
+            }
+            else {
+                while (n->position != start) {
+                    n = n->parent;
+                    path.push_back(Pos(n));
+                }
             }
 
             /*

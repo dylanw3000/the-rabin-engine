@@ -52,5 +52,8 @@ public:
     void gridInitialize(float weight, PathRequest request);
     Node* getNode(GridPos pos) { return &map[pos.row][pos.col]; }
     void PushNode(Node* n, float cost, Node* prev, PathRequest request);
-    
+
+    inline Vec3 Pos(Node* n) {
+        return terrain->get_world_position(n->position);
+    }
 };
