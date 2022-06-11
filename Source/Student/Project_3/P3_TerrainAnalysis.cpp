@@ -23,6 +23,24 @@ float distance_to_closest_wall(int row, int col)
     */
 
     // WRITE YOUR CODE HERE
+    GridPos pos(row, col);
+    if (!terrain->is_valid_grid_position(pos) || terrain->is_wall(pos)) return 0.f;
+
+    float minDist = sqrtf(powf(row - (-1.f), 2.f) + powf(col - (-1.f), 2.f));
+    // float minDist = Vec2::Distance(Vec2(-1, -1), Vec2(float(row), float(col)));
+    for (int x = -1; x < terrain->get_map_height() + 1; x++) {
+        for (int y = -1; y < terrain->get_map_width() + 1; y++) {
+            if (x < 0 || y < 0 || x == terrain->get_map_height() || y == terrain->get_map_width() || terrain->is_wall(x,y)) {
+                float d = sqrtf(powf(row - float(x), 2.f) + powf(col - float(y), 2.f));
+                // float d = Vec2::Distance(Vec2(x, y), Vec2(float(row), float(col)));
+                if (d < minDist) {
+                    minDist = d;
+                }
+            }
+        }
+    }
+
+    return minDist;
     
     return 0.0f; // REPLACE THIS
 }
@@ -39,6 +57,28 @@ bool is_clear_path(int row0, int col0, int row1, int col1)
     */
 
     // WRITE YOUR CODE HERE
+    // DirectX::SimpleMath::Vector2 p0(row0, col0);
+    // DirectX::SimpleMath::Vector2 p1(row1, col1);
+    Vec2 p0 = Vec2(float(row0), float(col0));
+    Vec2 p1 = Vec2(float(row1), float(col1));
+    float offset = 0.51f;
+
+    for (int x = 0; x < terrain->get_map_height(); x++) {
+        for (int y = 0; y < terrain->get_map_width(); y++) {
+            if (terrain->is_wall(x, y)) {
+                if(
+                    line_intersect(p0, p1, Vec2( x + offset,y + offset ), Vec2( x + offset, y - offset ))
+                    || line_intersect(p0, p1, { x + offset,y - offset }, { x - offset, y - offset })
+                    || line_intersect(p0, p1, { x - offset,y - offset }, { x - offset, y + offset })
+                    || line_intersect(p0, p1, { x - offset,y + offset }, { x + offset, y + offset })
+                ){
+                    return false;
+                }
+            }
+        }
+    }
+
+    return true;
 
     return false; // REPLACE THIS
 }
@@ -52,6 +92,33 @@ void analyze_openness(MapLayer<float> &layer)
     */
 
     // WRITE YOUR CODE HERE
+
+    float maxD = 0.f;
+
+    for (int x = 0; x < terrain->get_map_height(); x++) {
+        for (int y = 0; y < terrain->get_map_width(); y++) {
+            GridPos pos(x, y);
+            float d = distance_to_closest_wall(x, y);
+            if (!terrain->is_wall(pos)) {
+                layer.set_value({ x,y }, 1.f / (d * d));
+            }
+        }
+    }
+    
+}
+
+int vis_check(int row, int col) {
+    int counter = 0;
+    for (int x = 0; x < terrain->get_map_height(); x++) {
+        for (int y = 0; y < terrain->get_map_width(); y++) {
+            if (terrain->is_wall(row, col) || (x == row && y == col)) {
+                continue;
+            }
+
+            if (is_clear_path(row, col, x, y)) counter++;
+        }
+    }
+    return counter;
 }
 
 void analyze_visibility(MapLayer<float> &layer)
@@ -67,6 +134,17 @@ void analyze_visibility(MapLayer<float> &layer)
     */
 
     // WRITE YOUR CODE HERE
+    for (int x = 0; x < terrain->get_map_height(); x++) {
+        for (int y = 0; y < terrain->get_map_width(); y++) {
+            GridPos pos(x, y);
+            if (terrain->is_wall(pos)) {
+                layer.set_value(pos, 0);
+                continue;
+            }
+
+            layer.set_value(pos, std::fminf(1.f, vis_check(x, y) / 160.f));
+        }
+    }
 }
 
 void analyze_visible_to_cell(MapLayer<float> &layer, int row, int col)
@@ -82,6 +160,36 @@ void analyze_visible_to_cell(MapLayer<float> &layer, int row, int col)
     */
 
     // WRITE YOUR CODE HERE
+    for (int x = 0; x < terrain->get_map_height(); x++) {
+        for (int y = 0; y < terrain->get_map_width(); y++) {
+            GridPos pos(x, y);
+            if (terrain->is_wall(pos) || (x == row && y == col)) layer.set_value(pos, 0.f);
+
+            layer.set_value(pos, is_clear_path(row, col, x, y) ? 1.f : 0.f);
+        }
+    }
+
+    for (int x = 0; x < terrain->get_map_height(); x++) {
+        for (int y = 0; y < terrain->get_map_width(); y++) {
+            GridPos pos(x, y);
+            if (terrain->is_wall(pos)) continue;
+
+            if (layer.get_value(x, y) == 0.f) {
+                if (
+                    (x > 0 && layer.get_value(x - 1, y) == 1.f)
+                    || (x < terrain->get_map_height() - 1 && layer.get_value(x + 1, y) == 1.f)
+                    || (y > 0 && layer.get_value(x, y - 1) == 1.f)
+                    || (y < terrain->get_map_width() - 1 && layer.get_value(x, y + 1) == 1.f)
+                    || (x > 0 && y > 0 && layer.get_value(x - 1, y - 1) == 1.f)
+                    || (x < terrain->get_map_height()-1 && y>0 && layer.get_value(x + 1, y - 1) == 1.f)
+                    || (x < terrain->get_map_height()-1 && y < terrain->get_map_width()-1 && layer.get_value(x + 1, y + 1) == 1.f)
+                    || (x > 0 && y < terrain->get_map_width()-1 && layer.get_value(x - 1, y + 1) == 1.f)
+                ) {
+                    layer.set_value(pos, 0.5f);
+                }
+            }
+        }
+    }
 }
 
 void analyze_agent_vision(MapLayer<float> &layer, const Agent *agent)
