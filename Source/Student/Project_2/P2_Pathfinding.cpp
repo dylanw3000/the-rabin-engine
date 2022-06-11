@@ -121,9 +121,11 @@ void AStarPather::PushNode(Node* n, float cost, Node* prev, PathRequest request)
     }
     openList.push_back(n);
 
-    terrain->set_color(n->position, Colors::Blue);
-    if (n->position == terrain->get_grid_position(request.start) || n->position == terrain->get_grid_position(request.goal)) {
-        terrain->set_color(n->position, Colors::Orange);
+    if (request.settings.debugColoring) {
+        terrain->set_color(n->position, Colors::Blue);
+        if (n->position == terrain->get_grid_position(request.start) || n->position == terrain->get_grid_position(request.goal)) {
+            terrain->set_color(n->position, Colors::Orange);
+        }
     }
 }
 
@@ -176,8 +178,10 @@ PathResult AStarPather::compute_path(PathRequest &request)
         openList.clear();
         PushNode(getNode(start), 0.f, nullptr, request);
 
-        terrain->set_color(start, Colors::Orange);
-        terrain->set_color(goal, Colors::Orange);
+        if (request.settings.debugColoring) {
+            terrain->set_color(start, Colors::Orange);
+            terrain->set_color(goal, Colors::Orange);
+        }
 
         if (terrain->is_wall(start)) {
             request.path.push_back(request.start);
@@ -205,10 +209,12 @@ PathResult AStarPather::compute_path(PathRequest &request)
         // request.path.push_back(terrain->get_world_position(activeNode->position));
         openList.erase(openList.begin() + activeIndex);
         activeNode->onList = ListType::Closed;
-        terrain->set_color(activeNode->position, Colors::Yellow);
 
-        if (activeNode->position == terrain->get_grid_position(request.start) || activeNode->position == terrain->get_grid_position(request.goal)) {
-            terrain->set_color(activeNode->position, Colors::Orange);
+        if (request.settings.debugColoring) {
+            terrain->set_color(activeNode->position, Colors::Yellow);
+            if (activeNode->position == terrain->get_grid_position(request.start) || activeNode->position == terrain->get_grid_position(request.goal)) {
+                terrain->set_color(activeNode->position, Colors::Orange);
+            }
         }
 
         if (activeNode->position == terrain->get_grid_position(request.goal)) { // path complete
@@ -217,7 +223,7 @@ PathResult AStarPather::compute_path(PathRequest &request)
             GridPos goal = terrain->get_grid_position(request.goal);
 
             path.clear();
-            path.push_back(terrain->get_world_position(n->position));
+            
 
             if (request.settings.rubberBanding) {
                 int xmin, ymin, xmax, ymax;
@@ -259,30 +265,31 @@ PathResult AStarPather::compute_path(PathRequest &request)
                 std::vector<Vec3> positions;
                 float maxDist = 1.5f * Vec3::Distance(terrain->get_world_position(map[0][0].position), terrain->get_world_position(map[0][1].position));
 
-                positions.push_back(Pos(n));
+                // positions.push_back(Pos(n));
                 while (n->parent != nullptr) {
                     Vec3 v1 = Pos(n);
                     Vec3 v2 = Pos(n->parent);
                     
-                    Vec3 path = v2 - v1;
+                    Vec3 vec = v2 - v1;
                     int multiple = 1;
 
-                    while (path.Length() > maxDist) {
-                        path /= 2.f;
+                    while (vec.Length() > maxDist) {
+                        vec /= 2.f;
                         multiple *= 2;
                     }
 
                     for (int i = 0; i < multiple; i++) {
-                        positions.push_back(v1 + path * float(i));
+                        positions.push_back(v1 + vec * float(i));
                     }
 
                     n = n->parent;
                 }
+                positions.push_back(Pos(n));
 
-                std::reverse(positions.begin(), positions.end());
+                // std::reverse(positions.begin(), positions.end());
 
-                request.path.push_back(positions[0]);
-                for (int i = 0; i < positions.size() - 2; i++) {
+                path.push_back(positions[0]);
+                for (int i = 0; i < positions.size() - 1; i++) {
                     Vec3 v1;
                     if (i == 0) {
                         v1 = positions[0];
@@ -293,20 +300,21 @@ PathResult AStarPather::compute_path(PathRequest &request)
                     Vec3 v2 = positions[i];
                     Vec3 v3 = positions[i + 1];
                     Vec3 v4;
-                    if (i == positions.size() - 2) {
-                        v4 = positions[i + 1];
+                    if (i+2 == positions.size()) {
+                        v4 = v3;
                     }
                     else {
                         v4 = positions[i + 2];
                     }
 
-                    request.path.push_back(Vec3::CatmullRom(v1, v2, v3, v4, 0.25f));
-                    request.path.push_back(Vec3::CatmullRom(v1, v2, v3, v4, 0.5f));
-                    request.path.push_back(Vec3::CatmullRom(v1, v2, v3, v4, 0.75f));
-                    request.path.push_back(v3);
+                    path.push_back(Vec3::CatmullRom(v1, v2, v3, v4, 0.25f));
+                    path.push_back(Vec3::CatmullRom(v1, v2, v3, v4, 0.5f));
+                    path.push_back(Vec3::CatmullRom(v1, v2, v3, v4, 0.75f));
+                    path.push_back(v3);
                 }
             }
             else {
+                path.push_back(Pos(n));
                 while (n->position != start) {
                     n = n->parent;
                     path.push_back(Pos(n));
