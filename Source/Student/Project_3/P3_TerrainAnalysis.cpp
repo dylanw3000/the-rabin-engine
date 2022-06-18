@@ -213,6 +213,25 @@ void analyze_agent_vision(MapLayer<float> &layer, const Agent *agent)
     */
 
     // WRITE YOUR CODE HERE
+    float agentAng = atan2f(agent->get_forward_vector().z, agent->get_forward_vector().x);
+    Vec2 forwardVec = Vec2(agent->get_forward_vector().x, agent->get_forward_vector().z);
+    GridPos agentPos = terrain->get_grid_position(agent->get_position());
+
+    for (int x = 0; x < terrain->get_map_height(); x++) {
+        for (int y = 0; y < terrain->get_map_width(); y++) {
+            GridPos pos(x, y);
+            if (terrain->is_wall(pos)) continue;
+
+            Vec2 tileVec = Vec2(terrain->get_world_position(pos).x - agent->get_position().x, terrain->get_world_position(pos).z - agent->get_position().z);
+            float ang = forwardVec.Dot(tileVec);
+            
+            if (ang > 0.51f) {
+                if (is_clear_path(agentPos.row, agentPos.col, x, y)) {
+                    layer.set_value(pos, 1.f);
+                }
+            }
+        }
+    }
 }
 
 void propagate_solo_occupancy(MapLayer<float> &layer, float decay, float growth)
@@ -232,6 +251,66 @@ void propagate_solo_occupancy(MapLayer<float> &layer, float decay, float growth)
     */
     
     // WRITE YOUR CODE HERE
+    float tmp[40][40];
+
+    for (int x = 0; x < terrain->get_map_height(); x++) {
+        for (int y = 0; y < terrain->get_map_width(); y++) {
+            GridPos pos(x, y);
+            if (terrain->is_wall(pos)) {
+                tmp[x][y] = 0.f;
+                continue;
+            }
+
+            float highest = -1.f;
+            bool xminus = false;
+            bool xplus = false;
+            bool yminus = false;
+            bool yplus = false;
+            
+            if (x > 0) {
+                if (!terrain->is_wall(x - 1, y)) xminus = true;
+                highest = layer.get_value(x - 1, y);
+            }
+            if (x < terrain->get_map_height() - 1) {
+                if (!terrain->is_wall(x + 1, y)) xplus = true;
+                if (layer.get_value(x + 1, y) > highest) highest = layer.get_value(x + 1, y);
+            }
+
+            if (y > 0) {
+                if (!terrain->is_wall(x, y - 1)) yminus = true;
+                if (layer.get_value(x, y - 1) > highest) highest = layer.get_value(x, y - 1);
+            }
+            if (y < terrain->get_map_width() - 1) {
+                if (!terrain->is_wall(x, y + 1)) yplus = true;
+                if (layer.get_value(x, y + 1) > highest) highest = layer.get_value(x, y + 1);
+            }
+            
+
+            if (xminus && yminus) {
+                if (layer.get_value(x - 1, y - 1) > highest) highest = layer.get_value(x - 1, y - 1);
+            }
+            if (xplus && yminus) {
+                if (layer.get_value(x + 1, y - 1) > highest) highest = layer.get_value(x + 1, y - 1);
+            }
+            if (xplus && yplus) {
+                if (layer.get_value(x + 1, y + 1) > highest) highest = layer.get_value(x + 1, y + 1);
+            }
+            if (xminus && yplus) {
+                if (layer.get_value(x - 1, y + 1) > highest) highest = layer.get_value(x - 1, y + 1);
+            }
+
+
+            highest *= 1.f - decay;
+            tmp[x][y] = lerp(layer.get_value(pos), highest, growth);
+        }
+    }
+
+    for (int x = 0; x < terrain->get_map_height(); x++) {
+        for (int y = 0; y < terrain->get_map_width(); y++) {
+            GridPos pos(x, y);
+            layer.set_value(pos, tmp[x][y]);
+        }
+    }
 }
 
 void propagate_dual_occupancy(MapLayer<float> &layer, float decay, float growth)
@@ -253,6 +332,66 @@ void propagate_dual_occupancy(MapLayer<float> &layer, float decay, float growth)
     */
 
     // WRITE YOUR CODE HERE
+    float tmp[40][40];
+
+    for (int x = 0; x < terrain->get_map_height(); x++) {
+        for (int y = 0; y < terrain->get_map_width(); y++) {
+            GridPos pos(x, y);
+            if (terrain->is_wall(pos)) {
+                tmp[x][y] = layer.get_value(pos);
+                continue;
+            }
+
+            float highest = 0.f;
+            bool xminus = false;
+            bool xplus = false;
+            bool yminus = false;
+            bool yplus = false;
+
+            if (x > 0) {
+                if (!terrain->is_wall(x - 1, y)) xminus = true;
+                highest = layer.get_value(x - 1, y);
+            }
+            if (x < terrain->get_map_height() - 1) {
+                if (!terrain->is_wall(x + 1, y)) xplus = true;
+                if (fabsf(layer.get_value(x + 1, y)) > fabsf(highest)) highest = layer.get_value(x + 1, y);
+            }
+
+            if (y > 0) {
+                if (!terrain->is_wall(x, y - 1)) yminus = true;
+                if (fabsf(layer.get_value(x, y - 1)) > fabsf(highest)) highest = layer.get_value(x, y - 1);
+            }
+            if (y < terrain->get_map_width() - 1) {
+                if (!terrain->is_wall(x, y + 1)) yplus = true;
+                if (fabsf(layer.get_value(x, y + 1)) > fabsf(highest)) highest = layer.get_value(x, y + 1);
+            }
+
+
+            if (xminus && yminus) {
+                if (fabsf(layer.get_value(x - 1, y - 1)) > fabsf(highest)) highest = layer.get_value(x - 1, y - 1);
+            }
+            if (xplus && yminus) {
+                if (fabsf(layer.get_value(x + 1, y - 1)) > fabsf(highest)) highest = layer.get_value(x + 1, y - 1);
+            }
+            if (xplus && yplus) {
+                if (fabsf(layer.get_value(x + 1, y + 1)) > fabsf(highest)) highest = layer.get_value(x + 1, y + 1);
+            }
+            if (xminus && yplus) {
+                if (fabsf(layer.get_value(x - 1, y + 1)) > fabsf(highest)) highest = layer.get_value(x - 1, y + 1);
+            }
+
+
+            highest *= 1.f - decay;
+            tmp[x][y] = lerp(layer.get_value(pos), highest, growth);
+        }
+    }
+
+    for (int x = 0; x < terrain->get_map_height(); x++) {
+        for (int y = 0; y < terrain->get_map_width(); y++) {
+            GridPos pos(x, y);
+            layer.set_value(pos, tmp[x][y]);
+        }
+    }
 }
 
 void normalize_solo_occupancy(MapLayer<float> &layer)
@@ -264,6 +403,22 @@ void normalize_solo_occupancy(MapLayer<float> &layer)
     */
 
     // WRITE YOUR CODE HERE
+    float highest = -1.f;
+    for (int x = 0; x < terrain->get_map_height(); x++) {
+        for (int y = 0; y < terrain->get_map_width(); y++) {
+            GridPos pos(x, y);
+            if (layer.get_value(pos) > highest) highest = layer.get_value(pos);
+        }
+    }
+
+    if (highest <= 0.f) return;
+
+    for (int x = 0; x < terrain->get_map_height(); x++) {
+        for (int y = 0; y < terrain->get_map_width(); y++) {
+            GridPos pos(x, y);
+            if(layer.get_value(pos) > 0.f) layer.set_value(pos, layer.get_value(pos) / highest);
+        }
+    }
 }
 
 void normalize_dual_occupancy(MapLayer<float> &layer)
@@ -278,6 +433,23 @@ void normalize_dual_occupancy(MapLayer<float> &layer)
     */
 
     // WRITE YOUR CODE HERE
+    float highest = -1.f;
+    float lowest = 1.f;
+    for (int x = 0; x < terrain->get_map_height(); x++) {
+        for (int y = 0; y < terrain->get_map_width(); y++) {
+            GridPos pos(x, y);
+            if (layer.get_value(pos) > highest) highest = layer.get_value(pos);
+            if (layer.get_value(pos) < lowest) lowest = layer.get_value(pos);
+        }
+    }
+
+    for (int x = 0; x < terrain->get_map_height(); x++) {
+        for (int y = 0; y < terrain->get_map_width(); y++) {
+            GridPos pos(x, y);
+            if (layer.get_value(pos) > 0.f) layer.set_value(pos, layer.get_value(pos) / highest);
+            else if (layer.get_value(pos) < 0.f) layer.set_value(pos, layer.get_value(pos) / (-1.f * lowest));
+        }
+    }
 }
 
 void enemy_field_of_view(MapLayer<float> &layer, float fovAngle, float closeDistance, float occupancyValue, AStarAgent *enemy)
