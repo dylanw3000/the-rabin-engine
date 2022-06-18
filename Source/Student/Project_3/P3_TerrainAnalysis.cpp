@@ -223,9 +223,10 @@ void analyze_agent_vision(MapLayer<float> &layer, const Agent *agent)
             if (terrain->is_wall(pos)) continue;
 
             Vec2 tileVec = Vec2(terrain->get_world_position(pos).x - agent->get_position().x, terrain->get_world_position(pos).z - agent->get_position().z);
+            tileVec.Normalize();
             float ang = forwardVec.Dot(tileVec);
             
-            if (ang > 0.51f) {
+            if (ang > -0.01) {
                 if (is_clear_path(agentPos.row, agentPos.col, x, y)) {
                     layer.set_value(pos, 1.f);
                 }
@@ -470,6 +471,39 @@ void enemy_field_of_view(MapLayer<float> &layer, float fovAngle, float closeDist
     */
 
     // WRITE YOUR CODE HERE
+    for (int x = 0; x < terrain->get_map_height(); x++) {
+        for (int y = 0; y < terrain->get_map_width(); y++) {
+            GridPos pos(x, y);
+            if (layer.get_value(pos) < 0.f) layer.set_value(pos, 0.f);
+        }
+    }
+
+    Vec2 forwardVec = Vec2(enemy->get_forward_vector().x, enemy->get_forward_vector().z);
+    forwardVec.Normalize();
+    GridPos agentPos = terrain->get_grid_position(enemy->get_position());
+    float distSquare = closeDistance * closeDistance;
+
+    for (int x = 0; x < terrain->get_map_height(); x++) {
+        for (int y = 0; y < terrain->get_map_width(); y++) {
+            GridPos pos(x, y);
+            if (terrain->is_wall(pos)) continue;
+
+            if (pow(agentPos.col - pos.col, 2) + pow(agentPos.row - pos.row, 2) < distSquare) {
+                if(is_clear_path(agentPos.row, agentPos.col, x, y)) layer.set_value(pos, occupancyValue);
+                continue;
+            }
+
+            Vec2 tileVec = Vec2(terrain->get_world_position(pos).x - enemy->get_position().x, terrain->get_world_position(pos).z - enemy->get_position().z);
+            tileVec.Normalize();
+            float ang = forwardVec.Dot(tileVec);
+
+            if (ang > cosf(fovAngle / 360.f * 3.14159f)) {
+                if (is_clear_path(agentPos.row, agentPos.col, x, y)) {
+                    layer.set_value(pos, occupancyValue);
+                }
+            }
+        }
+    }
 }
 
 bool enemy_find_player(MapLayer<float> &layer, AStarAgent *enemy, Agent *player)
@@ -510,6 +544,22 @@ bool enemy_seek_player(MapLayer<float> &layer, AStarAgent *enemy)
     */
 
     // WRITE YOUR CODE HERE
+    float highVal = 0.f;
+    Vec3 targetPos;
+    for (int x = 0; x < terrain->get_map_height(); x++) {
+        for (int y = 0; y < terrain->get_map_width(); y++) {
+            GridPos pos(x, y);
+            float val = layer.get_value(pos);
+            if (val > highVal) {
+                highVal = val;
+                targetPos = terrain->get_world_position(pos);
+            }
+        }
+    }
 
+    if (highVal > 0.f) {
+        enemy->path_to(targetPos);
+        return true;
+    }
     return false; // REPLACE THIS
 }
